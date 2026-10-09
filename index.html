@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>👑 Facu & Maru | Master Dashboard Casamiento & Luna de Miel</title>
   
-  <!-- Google Fonts & Leaflet CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +27,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; padding-bottom: 40px; }
 
-    /* Modal de Contraseña */
+    /* Login Modal */
     #login-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: var(--bg-dark); z-index: 10000; display: flex;
@@ -75,6 +74,7 @@
     .btn { background: var(--gold-gradient); color: #000; font-weight: 700; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
     .btn:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn-secondary { background: transparent; border: 1px solid var(--card-border); color: var(--gold-light); }
+    .btn-danger { background: var(--accent-red); color: #fff; }
     
     input, select, textarea { background: var(--bg-dark); border: 1px solid rgba(212,175,55,0.4); color: #fff; padding: 8px; border-radius: 6px; font-size: 0.9rem; }
     input:focus, select:focus { border-color: var(--card-border); outline: none; }
@@ -159,7 +159,7 @@
   <!-- CONTENIDO PRINCIPAL -->
   <div class="container">
 
-    <!-- SOLAPA 0: RESUMEN GENERAL & CONFIGURACIÓN JSONBIN -->
+    <!-- SOLAPA 0: RESUMEN GENERAL -->
     <div class="tab-content active" id="tab-0">
       <div class="cloud-banner">
         <div>
@@ -204,6 +204,7 @@
               <th>IPC (%)</th>
               <th>Valor Cubierto (ARS)</th>
               <th>Total 70 Cubiertos (ARS)</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -215,19 +216,122 @@
     <!-- SOLAPA 2: INVITADOS & MESAS -->
     <div class="tab-content" id="tab-2">
       <div class="card">
-        <div class="card-title">Plano de Banquetes & Distribución de Mesas</div>
+        <div class="card-title">Agregar / Buscar Invitado</div>
+        <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+          <input type="text" id="nuevo-invitado-nombre" placeholder="Nombre del invitado" style="flex:1;">
+          <button class="btn" onclick="agregarInvitado()">+ Agregar Invitado</button>
+        </div>
         <div class="tables-grid" id="grid-mesas"></div>
       </div>
     </div>
 
-    <!-- SOLAPAS RESTANTES -->
-    <div class="tab-content" id="tab-3"><div class="card"><div class="card-title">Cronograma del Día de la Boda</div><p style="color:var(--text-muted);">Grilla de horarios con cálculo automático de minutos.</p></div></div>
-    <div class="tab-content" id="tab-4"><div class="card"><div class="card-title">Playlist & Carpetas de Música</div><p style="color:var(--text-muted);">Organizador de canciones por momentos.</p></div></div>
-    <div class="tab-content" id="tab-5"><div class="card"><div class="card-title">Cotillón DIY</div><p style="color:var(--text-muted);">Listado de artículos comprados y pendientes.</p></div></div>
-    <div class="tab-content" id="tab-6"><div class="card"><div class="card-title">Mapa Interactivo de Canadá</div><div id="map"></div></div></div>
-    <div class="tab-content" id="tab-7"><div class="card"><div class="card-title">Itinerario 21 Días</div><p style="color:var(--text-muted);">Detalle día por día con hoteles y actividades.</p></div></div>
-    <div class="tab-content" id="tab-8"><div class="card"><div class="card-title">Matriz Canada's Wonderland</div><p style="color:var(--text-muted);">Clasificación de montañas rusas.</p></div></div>
-    <div class="tab-content" id="tab-9"><div class="card"><div class="card-title">Registro de Regalos de Invitados</div><p style="color:var(--text-muted);">Monitoreo de regalos recibidos.</p></div></div>
+    <!-- SOLAPA 3: DIA BODA HORARIOS -->
+    <div class="tab-content" id="tab-3">
+      <div class="card">
+        <div class="card-title">Cronograma Dinámico del Día Boda</div>
+        <div style="margin-bottom:15px;">
+          <label>Hora Inicio Evento: </label>
+          <input type="time" id="hora-inicio-boda" value="19:00" onchange="renderCronograma()">
+        </div>
+        <table id="tabla-cronograma">
+          <thead>
+            <tr>
+              <th>Inicio</th>
+              <th>Actividad</th>
+              <th>Duración (min)</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn" style="margin-top:10px;" onclick="agregarActividad()">+ Agregar Bloque</button>
+      </div>
+    </div>
+
+    <!-- SOLAPA 4: PLAYLIST -->
+    <div class="tab-content" id="tab-4">
+      <div class="card">
+        <div class="card-title">Carpetas & Playlist</div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <input type="text" id="nombre-carpeta-musica" placeholder="Nueva Carpeta (ej: Vals, Entrada)">
+          <button class="btn" onclick="crearCarpetaMusica()">+ Crear Carpeta</button>
+        </div>
+        <div id="contenedor-playlist"></div>
+      </div>
+    </div>
+
+    <!-- SOLAPA 5: COTILLON DIY -->
+    <div class="tab-content" id="tab-5">
+      <div class="card">
+        <div class="card-title">Cotillón DIY</div>
+        <table id="tabla-cotillon">
+          <thead>
+            <tr>
+              <th>Comprado</th>
+              <th>Artículo</th>
+              <th>Precio (ARS)</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn" style="margin-top:10px;" onclick="agregarCotillon()">+ Agregar Item</button>
+      </div>
+    </div>
+
+    <!-- SOLAPA 6: LUNA DE MIEL MAPA -->
+    <div class="tab-content" id="tab-6">
+      <div class="card">
+        <div class="card-title">Mapa Interactivo de Canadá</div>
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- SOLAPA 7: ITINERARIO -->
+    <div class="tab-content" id="tab-7">
+      <div class="card">
+        <div class="card-title">Itinerario 21 Días</div>
+        <div id="contenedor-dias" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:15px;"></div>
+      </div>
+    </div>
+
+    <!-- SOLAPA 8: WONDERLAND -->
+    <div class="tab-content" id="tab-8">
+      <div class="card">
+        <div class="card-title">Matriz Canada's Wonderland</div>
+        <table id="tabla-wonderland">
+          <thead>
+            <tr>
+              <th>Atracción</th>
+              <th>Prioridad</th>
+              <th>Subir?</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn" style="margin-top:10px;" onclick="agregarWonderland()">+ Agregar Atracción</button>
+      </div>
+    </div>
+
+    <!-- SOLAPA 9: REGALOS -->
+    <div class="tab-content" id="tab-9">
+      <div class="card">
+        <div class="card-title">Registro de Regalos</div>
+        <table id="tabla-regalos">
+          <thead>
+            <tr>
+              <th>Invitado</th>
+              <th>Monto</th>
+              <th>Moneda</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn" style="margin-top:10px;" onclick="agregarRegalo()">+ Registrar Regalo</button>
+      </div>
+    </div>
 
   </div>
 
@@ -235,7 +339,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   
   <script>
-    // CONTRASEÑA DEFINIDA
     const PASS_CORRECTA = "M&F2027";
 
     function validarPass() {
@@ -249,17 +352,39 @@
       }
     }
 
-    // ESTADO GLOBAL
     let state = {
       binId: localStorage.getItem('BIN_ID') || '',
       apiKey: localStorage.getItem('API_KEY') || '',
       rates: { usdArs: 1200, cadUsd: 0.74 },
       tabNames: ["📊 Resumen", "🌹 Boda Udaondo", "👥 Invitados & Mesas", "⏱️ Día Boda", "🎵 Playlist", "🎭 Cotillón DIY", "🍁 Luna de Miel & Mapa", "🗓️ Itinerario 21 Días", "🎢 Wonderland", "🎁 Regalos Invitados"],
-      ipc: [{ mes: "Feb 2025 (Base)", ipc: 0, valor: 138024 }],
-      invitados: ["Maru", "Facu", "Gabi", "Fabi", "Flor P", "Mavi", "Tomi B", "Jor", "Horai", "Vale", "Diego C", "Flor C", "Eze", "Mabeluchita"],
+      ipc: [
+        { mes: "Feb 2025 (Base)", ipc: 0 },
+        { mes: "Marzo 2025", ipc: 3.5 }
+      ],
+      invitados: ["Maru", "Facu", "Gabi", "Fabi", "Flor P", "Mavi", "Tomi B"],
       mesas: [
         { nombre: "Mesa Principal Imperial", capacidad: 6, integrantes: ["Maru", "Facu"] },
-        { nombre: "Mesa Amigos", capacidad: 8, integrantes: ["Tomi B", "Jor"] }
+        { nombre: "Mesa Amigos", capacidad: 8, integrantes: ["Tomi B"] }
+      ],
+      cronograma: [
+        { nombre: "Recepción Novios", duracion: 45 },
+        { nombre: "Cena Principal", duracion: 90 },
+        { nombre: "Apertura de Pista", duracion: 60 }
+      ],
+      playlist: [
+        { carpeta: "Entrada Novios", canciones: [{ titulo: "Song 1", link: "" }] }
+      ],
+      cotillon: [
+        { nombre: "Capa LED", precio: 25000, comprado: true },
+        { nombre: "Vinchas Disney", precio: 15000, comprado: false }
+      ],
+      itinerario: Array.from({length: 21}, (_, i) => ({ dia: i, titulo: `Día ${i}`, ciudad: "Toronto", detalle: "" })),
+      wonderland: [
+        { nombre: "Yukon Striker", prioridad: "Alta", subir: "Sí" },
+        { nombre: "Leviathan", prioridad: "Alta", subir: "Sí" }
+      ],
+      regalos: [
+        { invitado: "Tomi B", monto: 50000, moneda: "ARS" }
       ]
     };
 
@@ -269,10 +394,15 @@
       actualizarCountdowns();
       renderIPC();
       renderMesas();
+      renderCronograma();
+      renderPlaylist();
+      renderCotillon();
+      renderItinerario();
+      renderWonderland();
+      renderRegalos();
       if(state.binId && state.apiKey) sincronizarNube();
     }
 
-    // NUBE JSONBIN.IO
     function guardarConfiguracionNube() {
       state.binId = document.getElementById('cfg-bin-id').value.trim();
       state.apiKey = document.getElementById('cfg-api-key').value.trim();
@@ -291,12 +421,9 @@
         const data = await res.json();
         if(data.record) {
           state = { ...state, ...data.record };
-          renderIPC();
-          renderMesas();
+          init();
         }
-      } catch(e) {
-        console.error("Error al sincronizar:", e);
-      }
+      } catch(e) { console.error("Error al sincronizar:", e); }
     }
 
     async function guardarEnNube() {
@@ -310,7 +437,6 @@
       } catch(e) { console.error(e); }
     }
 
-    // TABS
     function switchTab(idx) {
       document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
       document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
@@ -326,7 +452,7 @@
       }
     }
 
-    // LOGICA IPC UDAONDO
+    /* IPC UDAONDO */
     function renderIPC() {
       const tbody = document.querySelector('#tabla-ipc tbody');
       if(!tbody) return;
@@ -340,6 +466,7 @@
             <td><input type="number" value="${item.ipc}" onchange="updateIPC(${i}, this.value)" style="width:70px;"> %</td>
             <td>$${Math.round(base).toLocaleString('es-AR')}</td>
             <td>$${Math.round(base * 70).toLocaleString('es-AR')}</td>
+            <td><button class="btn btn-danger" onclick="borrarIPC(${i})">X</button></td>
           </tr>
         `;
       });
@@ -347,20 +474,23 @@
 
     function agregarMesIPC() {
       const nombre = prompt("Nombre del Mes:");
-      if(nombre) {
-        state.ipc.push({ mes: nombre, ipc: 0 });
-        renderIPC();
+      if(nombre) { state.ipc.push({ mes: nombre, ipc: 0 }); renderIPC(); guardarEnNube(); }
+    }
+
+    function updateIPC(idx, val) { state.ipc[idx].ipc = parseFloat(val) || 0; renderIPC(); guardarEnNube(); }
+    function borrarIPC(idx) { state.ipc.splice(idx, 1); renderIPC(); guardarEnNube(); }
+
+    /* MESAS E INVITADOS */
+    function agregarInvitado() {
+      const input = document.getElementById('nuevo-invitado-nombre');
+      if(input.value.trim()) {
+        state.invitados.push(input.value.trim());
+        input.value = '';
+        renderMesas();
         guardarEnNube();
       }
     }
 
-    function updateIPC(idx, val) {
-      state.ipc[idx].ipc = parseFloat(val) || 0;
-      renderIPC();
-      guardarEnNube();
-    }
-
-    // MESAS
     function renderMesas() {
       const grid = document.getElementById('grid-mesas');
       if(!grid) return;
@@ -377,7 +507,148 @@
       });
     }
 
-    // COUNTDOWNS
+    /* CRONOGRAMA DIA BODA */
+    function renderCronograma() {
+      const tbody = document.querySelector('#tabla-cronograma tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      let horaActual = document.getElementById('hora-inicio-boda').value || "19:00";
+      
+      state.cronograma.forEach((item, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${horaActual} hs</td>
+            <td><input type="text" value="${item.nombre}" onchange="state.cronograma[${i}].nombre=this.value; guardarEnNube();"></td>
+            <td><input type="number" value="${item.duracion}" onchange="state.cronograma[${i}].duracion=parseInt(this.value)||0; renderCronograma(); guardarEnNube();" style="width:70px;"></td>
+            <td><button class="btn btn-danger" onclick="state.cronograma.splice(${i},1); renderCronograma(); guardarEnNube();">X</button></td>
+          </tr>
+        `;
+        let [h, m] = horaActual.split(':').map(Number);
+        m += item.duracion;
+        h = (h + Math.floor(m / 60)) % 24;
+        m = m % 60;
+        horaActual = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      });
+    }
+
+    function agregarActividad() {
+      state.cronograma.push({ nombre: "Nueva Actividad", duracion: 30 });
+      renderCronograma();
+      guardarEnNube();
+    }
+
+    /* PLAYLIST */
+    function renderPlaylist() {
+      const cont = document.getElementById('contenedor-playlist');
+      if(!cont) return;
+      cont.innerHTML = '';
+      state.playlist.forEach((carp, i) => {
+        cont.innerHTML += `
+          <div class="card">
+            <h4 style="color:var(--gold-light);">${carp.carpeta}</h4>
+            <ul>
+              ${carp.canciones.map(c => `<li>${c.titulo}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      });
+    }
+
+    function crearCarpetaMusica() {
+      const inp = document.getElementById('nombre-carpeta-musica');
+      if(inp.value.trim()) {
+        state.playlist.push({ carpeta: inp.value.trim(), canciones: [] });
+        inp.value = '';
+        renderPlaylist();
+        guardarEnNube();
+      }
+    }
+
+    /* COTILLON */
+    function renderCotillon() {
+      const tbody = document.querySelector('#tabla-cotillon tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      state.cotillon.forEach((item, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="checkbox" ${item.comprado ? 'checked' : ''} onchange="state.cotillon[${i}].comprado=this.checked; guardarEnNube();"></td>
+            <td><input type="text" value="${item.nombre}" onchange="state.cotillon[${i}].nombre=this.value; guardarEnNube();"></td>
+            <td><input type="number" value="${item.precio}" onchange="state.cotillon[${i}].precio=parseFloat(this.value)||0; guardarEnNube();"></td>
+            <td><button class="btn btn-danger" onclick="state.cotillon.splice(${i},1); renderCotillon(); guardarEnNube();">X</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function agregarCotillon() {
+      state.cotillon.push({ nombre: "Nuevo Artículo", precio: 0, comprado: false });
+      renderCotillon();
+      guardarEnNube();
+    }
+
+    /* ITINERARIO */
+    function renderItinerario() {
+      const cont = document.getElementById('contenedor-dias');
+      if(!cont) return;
+      cont.innerHTML = '';
+      state.itinerario.forEach((d, i) => {
+        cont.innerHTML += `
+          <div class="card" style="margin:0;">
+            <strong style="color:var(--gold-light);">${d.titulo}</strong>
+            <div><input type="text" value="${d.ciudad}" onchange="state.itinerario[${i}].ciudad=this.value; guardarEnNube();" style="width:100%; margin-top:5px;"></div>
+          </div>
+        `;
+      });
+    }
+
+    /* WONDERLAND */
+    function renderWonderland() {
+      const tbody = document.querySelector('#tabla-wonderland tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      state.wonderland.forEach((w, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="text" value="${w.nombre}" onchange="state.wonderland[${i}].nombre=this.value; guardarEnNube();"></td>
+            <td>${w.prioridad}</td>
+            <td>${w.subir}</td>
+            <td><button class="btn btn-danger" onclick="state.wonderland.splice(${i},1); renderWonderland(); guardarEnNube();">X</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function agregarWonderland() {
+      state.wonderland.push({ nombre: "Nueva Atracción", prioridad: "Media", subir: "Sí" });
+      renderWonderland();
+      guardarEnNube();
+    }
+
+    /* REGALOS */
+    function renderRegalos() {
+      const tbody = document.querySelector('#tabla-regalos tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      state.regalos.forEach((r, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="text" value="${r.invitado}" onchange="state.regalos[${i}].invitado=this.value; guardarEnNube();"></td>
+            <td><input type="number" value="${r.monto}" onchange="state.regalos[${i}].monto=parseFloat(this.value)||0; guardarEnNube();"></td>
+            <td>${r.moneda}</td>
+            <td><button class="btn btn-danger" onclick="state.regalos[${i}].splice(${i},1); renderRegalos(); guardarEnNube();">X</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function agregarRegalo() {
+      state.regalos.push({ invitado: "Nuevo Invitado", monto: 10000, moneda: "ARS" });
+      renderRegalos();
+      guardarEnNube();
+    }
+
+    /* COUNTDOWNS */
     function actualizarCountdowns() {
       const tWedding = new Date('2027-09-04T18:00:00');
       const tHoney = new Date('2027-09-08T10:00:00');
@@ -390,7 +661,7 @@
       document.getElementById('cd-honeymoon').innerText = `${dH} días`;
     }
 
-    // MAPA
+    /* MAPA */
     let mapInitialized = false;
     function initMap() {
       if(mapInitialized) return;
